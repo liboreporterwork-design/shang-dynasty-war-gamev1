@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>甲骨文战棋：商周纪元</title>
+    <style>
+        /* 全局样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 青铜器风格主色调 */
+        :root {
+            --bronze-primary: #8B4513;
+            --bronze-secondary: #D2B48C;
+            --bronze-accent: #CD853F;
+            --bronze-dark: #654321;
+            --bronze-light: #F5DEB3;
+            --scroll-background: #2C1B13;
+            --text-primary: #FFFFFF;
+            --text-secondary: #FFD700;
+        }
+
+        /* 页面背景与基础样式 */
+        body {
+            background: linear-gradient(135deg, var(--scroll-background) 0%, #1A0F0A 100%);
+            font-family: 'Microsoft YaHei', 'SimHei', serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(210, 180, 140, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(205, 133, 63, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(139, 69, 19, 0.1) 0%, transparent 50%);
+            background-size: 100% 100%;
+        }
+
+        /* 游戏容器 - 青铜器边框效果 */
+        .game-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 
+                0 0 20px rgba(210, 180, 140, 0.3),
+                inset 0 0 20px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(135deg, var(--bronze-dark) 0%, var(--bronze-primary) 50%, var(--bronze-dark) 100%);
+            border: 3px solid var(--bronze-accent);
+        }
+
+        /* 游戏标题 - 青铜器风格文字 */
+        .game-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 15px;
+            text-shadow: 
+                0 0 10px rgba(255, 215, 0, 0.8),
+                0 0 20px rgba(255, 215, 0, 0.4),
+                0 0 30px rgba(255, 215, 0, 0.2);
+            letter-spacing: 3px;
+            font-family: 'SimSun', serif;
+            position: relative;
+        }
+
+        .game-title::before, .game-title::after {
+            content: '⚔';
+            color: var(--bronze-accent);
+            margin: 0 10px;
+            font-size: 18px;
+        }
+
+        /* Canvas容器 - 战场区域 */
+        .canvas-container {
+            position: relative;
+            border: 2px solid var(--bronze-secondary);
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 
+                inset 0 0 10px rgba(0, 0, 0, 0.7),
+                0 0 15px rgba(210, 180, 140, 0.4);
+        }
+
+        #gameCanvas {
+            display: block;
+            background-color: #1a1a2e;
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(210, 180, 140, 0.05) 50px, rgba(210, 180, 140, 0.05) 51px),
+                repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(210, 180, 140, 0.05) 50px, rgba(210, 180, 140, 0.05) 51px);
+        }
+
+        /* 游戏信息栏 - 青铜器风格 */
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 15px;
+            padding: 10px 15px;
+            background: linear-gradient(135deg, rgba(139, 69, 19, 0.7) 0%, rgba(205, 133, 63, 0.7) 100%);
+            border: 1px solid var(--bronze-secondary);
+            border-radius: 5px;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .info-label {
+            margin-right: 5px;
+            font-weight: bold;
+            color: var(--text-secondary);
+        }
+
+        /* 控制按钮区域 */
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .control-btn {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, var(--bronze-accent) 0%, var(--bronze-secondary) 100%);
+            border: 1px solid var(--bronze-primary);
+            border-radius: 5px;
+            color: var(--scroll-background);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(135deg, var(--bronze-secondary) 0%, var(--bronze-accent) 100%);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .control-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 10px;
+                margin: 10px;
+            }
+
+            .game-title {
+                font-size: 18px;
+                margin-bottom: 10px;
+            }
+
+            .game-info {
+                flex-direction: column;
+                gap: 5px;
+                font-size: 12px;
+                padding: 8px;
+            }
+
+            .control-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .control-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+        }
+
+        /* 加载动画 - 青铜器风格 */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--text-secondary);
+            font-size: 18px;
+            text-align: center;
+            z-index: 100;
+        }
+
+        .loading::after {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 40px;
+            margin: 10px auto;
+            border: 3px solid var(--bronze-secondary);
+            border-top: 3px solid var(--text-secondary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">甲骨文战棋</h1>
+        
+        <div class="canvas-container">
+            <canvas id="gameCanvas" width="720" height="1280"></canvas>
+            <div class="loading" id="loading">正在加载游戏...</div>
+        </div>
+        
+        <div class="game-info">
+            <div class="info-item">
+                <span class="info-label">回合:</span>
+                <span id="turnInfo">1</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">玩家:</span>
+                <span id="playerInfo">玩家</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">阶段:</span>
+                <span id="phaseInfo">移动</span>
+            </div>
+        </div>
+        
+        <div class="control-buttons">
+            <button class="control-btn" id="restartBtn">重新开始</button>
+            <button class="control-btn" id="pauseBtn">暂停</button>
+        </div>
+    </div>
+
+    <script src="oracleWar.js"></script>
+    <script>
+        // 游戏全局变量
+        let game;
+        let isPaused = false;
+
+        // DOM元素
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const loadingElement = document.getElementById('loading');
+        const turnInfo = document.getElementById('turnInfo');
+        const playerInfo = document.getElementById('playerInfo');
+        const phaseInfo = document.getElementById('phaseInfo');
+        const restartBtn = document.getElementById('restartBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+
+        // 初始化游戏
+        function initGame() {
+            try {
+                game = new OracleWarGame(canvas, ctx);
+                game.init();
+                
+                // 隐藏加载动画
+                loadingElement.style.display = 'none';
+                
+                // 启动游戏循环
+                gameLoop();
+                
+                console.log('游戏初始化成功');
+            } catch (error) {
+                console.error('游戏初始化失败:', error);
+                loadingElement.innerHTML = '游戏加载失败<br>请刷新页面重试';
+            }
+        }
+
+        // 游戏主循环
+        function gameLoop() {
+            if (!isPaused && game) {
+                game.update();
+                game.render();
+                
+                // 更新UI信息
+                updateGameInfo();
+            }
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        // 更新游戏信息UI
+        function updateGameInfo() {
+            if (game) {
+                // 更新回合信息
+                turnInfo.textContent = '玩家';
+                
+                // 更新当前玩家
+                playerInfo.textContent = game.currentPlayer === 'player' ? '玩家' : '敌方';
+                
+                // 更新回合阶段
+                phaseInfo.textContent = game.getPhaseName();
+            }
+        }
+
+        // 绑定事件处理函数
+        function bindEvents() {
+            // 鼠标事件
+            canvas.addEventListener('mousedown', handleMouseDown);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', handleMouseUp);
+            
+            // 触摸事件
+            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            canvas.addEventListener('touchend', handleTouchEnd);
+            
+            // 控制按钮事件
+            restartBtn.addEventListener('click', restartGame);
+            pauseBtn.addEventListener('click', togglePause);
+        }
+
+        // 鼠标按下事件
+        function handleMouseDown(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            if (game) game.handleTouch(x, y);
+        }
+
+        // 鼠标移动事件
+        function handleMouseMove(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            if (game) game.handleTouchMove(x, y);
+        }
+
+        // 鼠标抬起事件
+        function handleMouseUp(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            if (game) game.handleTouchEnd(x, y);
+        }
+
+        // 触摸开始事件
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            if (game) game.handleTouch(x, y);
+        }
+
+        // 触摸移动事件
+        function handleTouchMove(e) {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            if (game) game.handleTouchMove(x, y);
+        }
+
+        // 触摸结束事件
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            if (e.changedTouches.length > 0) {
+                const rect = canvas.getBoundingClientRect();
+                const touch = e.changedTouches[0];
+                const x = touch.clientX - rect.left;
+                const y = touch.clientY - rect.top;
+                if (game) game.handleTouchEnd(x, y);
+            }
+        }
+
+        // 重新开始游戏
+        function restartGame() {
+            if (game) {
+                game.restartGame();
+                loadingElement.style.display = 'none';
+                isPaused = false;
+                pauseBtn.textContent = '暂停';
+            }
+        }
+
+        // 暂停/继续游戏
+        function togglePause() {
+            isPaused = !isPaused;
+            pauseBtn.textContent = isPaused ? '继续' : '暂停';
+        }
+
+        // 页面加载完成后初始化游戏
+        window.addEventListener('load', () => {
+            bindEvents();
+            initGame();
+        });
+
+        // 处理窗口大小变化
+        window.addEventListener('resize', () => {
+            // 可以在这里添加窗口大小变化的处理逻辑
+            // 例如调整canvas大小以适应不同屏幕
+        });
+    </script>
+</body>
+</html>

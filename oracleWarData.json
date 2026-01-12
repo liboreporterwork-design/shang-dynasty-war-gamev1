@@ -1,0 +1,162 @@
+{ 
+   "game_name": "甲骨文战棋：商周纪元", 
+   "version": "0.1", 
+   "data_types": ["兵种", "增益状态", "阵法"], 
+   "units": [ 
+     { 
+       "id": "unit_militia", 
+       "name": "民兵", 
+       "type": "兵卒", 
+       "description": "由‘人’元素直接召唤的基础单位。", 
+       "health": 8, 
+       "attack": 4, 
+       "attack_range": 1, 
+       "move_range": 3, 
+       "attack_speed": 1.0, 
+       "critical_chance": 0.05, 
+       "traits": ["基础单位"], 
+       "summon_cost": ["element_person"] 
+     }, 
+     { 
+       "id": "unit_infantry", 
+       "name": "兵卒", 
+       "type": "兵卒", 
+       "description": "持剑盾的重装步兵，阵线的基石。", 
+       "health": 20, 
+       "attack": 6, 
+       "attack_range": 1, 
+       "move_range": 3, 
+       "attack_speed": 1.3, 
+       "critical_chance": 0.05, 
+       "traits": ["坚守"], 
+       "trait_desc": "坚守：受到来自‘骑乘’兵种的攻击时，伤害减免30%。" 
+     }, 
+     { 
+       "id": "unit_cavalry", 
+       "name": "骑乘", 
+       "type": "骑乘", 
+       "description": "高机动的轻骑兵，擅长冲锋与侧翼突袭。", 
+       "health": 12, 
+       "attack": 9, 
+       "attack_range": 1, 
+       "move_range": 5, 
+       "attack_speed": 1.0, 
+       "critical_chance": 0.20, 
+       "traits": ["奔袭"], 
+       "trait_desc": "奔袭：若移动超过3格后攻击，本次攻击暴击率提升至35%。对‘弓弩’兵种额外增加15%暴击率。" 
+     }, 
+     { 
+       "id": "unit_archer", 
+       "name": "弓弩", 
+       "type": "弓弩", 
+       "description": "安全的远程打击者，但惧怕被近身。", 
+       "health": 10, 
+       "attack": 8, 
+       "attack_range": 3, 
+       "move_range": 3, 
+       "attack_speed": 0.6, 
+       "critical_chance": 0.10, 
+       "traits": ["精准", "脆弱"], 
+       "trait_desc": "精准：攻击‘兵卒’时，无视其20%的防御。脆弱：被近身攻击时，承受的暴击率增加30%。" 
+     }, 
+     { 
+       "id": "unit_elite_fa", 
+       "name": "精锐伐卒", 
+       "type": "兵卒", 
+       "description": "由‘伐’字融合召唤的精锐步兵，士气高昂。", 
+       "health": 15, 
+       "attack": 8, 
+       "attack_range": 1, 
+       "move_range": 3, 
+       "attack_speed": 1.2, 
+       "critical_chance": 0.10, 
+       "traits": ["坚守", "士气"], 
+       "trait_desc": "士气：登场首回合，攻击力额外提升2点。", 
+       "summon_by_fusion": ["element_person", "element_ge"] 
+     } 
+   ], 
+   "buffs": [ 
+     { 
+       "id": "buff_tian_ming", 
+       "name": "天命加护", 
+       "description": "周武王姬发的领袖气场。全军获得天命鼓舞。", 
+       "effect_type": "团队增益", 
+       "effect_target": "all_allies", 
+       "effect_details": { 
+         "attack_speed_bonus": 0.15, 
+         "description_show": "攻击速度提升15%" 
+       }, 
+       "source_character": "姬发" 
+     }, 
+     { 
+       "id": "buff_ju_dun", 
+       "name": "举盾", 
+       "description": "源自‘土’元素的防御姿态。举盾者无懈可击。", 
+       "effect_type": "伤害减免", 
+       "effect_target": "single_unit", 
+       "effect_details": { 
+         "damage_reduction": 0.50, 
+         "max_stacks": 3, 
+         "description_show": "使受到的下3次伤害减少50%" 
+       }, 
+       "source_element": "element_earth", 
+       "related_character": "盾卫" 
+     }, 
+     { 
+       "id": "buff_che_chi", 
+       "name": "车驰", 
+       "description": "源自‘马’与‘车’的冲击之力。战车冲锋，势不可挡。", 
+       "effect_type": "首次攻击强化", 
+       "effect_target": "single_unit", 
+       "effect_details": { 
+         "first_attack_multiplier": 1.5, 
+         "knockback": true, 
+         "description_show": "首次攻击造成150%伤害，并击退目标" 
+       }, 
+       "source_fusion": ["element_horse", "element_chariot"] 
+     } 
+   ], 
+   "formations": [ 
+     { 
+       "id": "formation_zhong", 
+       "name": "众", 
+       "oracle_word": "众", 
+       "composition": ["人", "人", "人"], 
+       "description": "三人成众。商代‘众人’是主要的劳动与作战团体，象征团结的力量。", 
+       "type": "召唤强化", 
+       "effect": "召唤3个‘民兵’。若他们彼此相邻，则生命值额外增加3点。", 
+       "historical_note": "甲骨文中的‘众’字，像三人在太阳下劳作，是商朝社会的基础。" 
+     }, 
+     { 
+       "id": "formation_fa", 
+       "name": "伐", 
+       "oracle_word": "伐", 
+       "composition": ["人", "戈"], 
+       "description": "以戈击人，意为征伐。直观体现了‘武王伐纣’的战争行动。", 
+       "type": "精锐召唤", 
+       "effect": "召唤一个强大的‘精锐伐卒’，并使其获得‘士气’效果。", 
+       "historical_note": "甲骨文‘伐’字是商周时期战争的直接记录，此融合是游戏核心战斗体验。" 
+     }, 
+     { 
+       "id": "formation_yu", 
+       "name": "驭", 
+       "oracle_word": "驭", 
+       "composition": ["马", "车", "人"], 
+       "description": "执鞭驱马，驾驭战车。代表了商周时期最高机动性与冲击力的兵种。", 
+       "type": "机动强化", 
+       "effect": "使一个‘骑乘’单位晋升为‘驭手战车’，获得技能‘驰骋’：击杀后可再次移动。", 
+       "historical_note": "‘驭’字展现了古人对车马的控制，是军事技术的重要体现。" 
+     }, 
+     { 
+       "id": "formation_hua", 
+       "name": "化", 
+       "oracle_word": "化", 
+       "composition": ["人", "心"], 
+       "description": "二人相倒背，人心转变。象征思想、阵营的转变与归化。", 
+       "type": "特殊事件", 
+       "effect": "触发‘奴隶倒戈’事件。将战场上最多2个敌方‘民兵’或‘兵卒’转化为我方单位。", 
+       "historical_note": "此阵再现牧野之战中‘前徒倒戈’的关键历史瞬间，是策略转折点。", 
+       "is_historical_event": true 
+     } 
+   ] 
+ }
